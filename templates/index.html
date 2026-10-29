@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Password Cracking and Secure Hashing classroom demonstration">
+  <title>Password Cracking & Secure Hashing Lab</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="brand-header">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">🔐</div>
+      <div>
+        <h1>Password Cracking &amp; Secure Hashing</h1>
+        <p class="sub">สื่อสาธิต 4 ขั้น · คำนวณด้วย Python server ในเครื่อง · ใช้เฉพาะรหัสผ่านตัวอย่าง</p>
+      </div>
+    </div>
+    <nav class="tabs" aria-label="เลือกขั้นตอนการสาธิต">
+      <button class="tab active" data-t="t1">1. Hash Playground</button>
+      <button class="tab" data-t="t2">2. Dictionary Attack</button>
+      <button class="tab" data-t="t3">3. Brute Force</button>
+      <button class="tab" data-t="t4">4. Salt &amp; Key Stretching</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Step 1 -->
+    <section class="panel active" id="t1" aria-labelledby="title-t1">
+      <div class="page-heading">
+        <div><p class="eyebrow">STEP 01</p><h2 id="title-t1">Hash Playground</h2></div>
+        <p>เปรียบเทียบ hash แบบเร็วกับ password hash แบบปรับ cost ได้</p>
+      </div>
+      <div class="page-layout">
+        <section class="control-panel" aria-label="ตั้งค่า hash">
+          <label for="pw1">รหัสผ่านตัวอย่าง</label>
+          <input id="pw1" value="P@ssw0rd123" autocomplete="off">
+          <button class="primary-button" data-action="hash-playground">คำนวณ Hash</button>
+
+          <div class="result-stack" id="hp-out" aria-live="polite">
+            <div class="empty-result">ผลลัพธ์ MD5, SHA-1 และ bcrypt จะแสดงตรงนี้</div>
+          </div>
+
+          <div class="cost-control">
+            <label for="costrange">bcrypt cost factor <strong id="costval">10</strong></label>
+            <input type="range" id="costrange" min="4" max="12" value="10">
+            <p>เพิ่ม cost ทีละ 1 จะเพิ่มงานคำนวณประมาณ 2 เท่า (2<sup>cost</sup>)</p>
+          </div>
+        </section>
+        <section class="live-panel" aria-labelledby="hash-log-title">
+          <div class="log-title-row"><h3 id="hash-log-title">Live Log</h3><span>Python backend</span></div>
+          <div class="log live-log" id="hp-log" aria-live="polite" aria-label="Hash operation log"></div>
+        </section>
+      </div>
+    </section>
+
+    <!-- Step 2 -->
+    <section class="panel" id="t2" aria-labelledby="title-t2">
+      <div class="page-heading">
+        <div><p class="eyebrow">STEP 02</p><h2 id="title-t2">Dictionary Attack</h2></div>
+        <p>ลองคำจาก wordlist แล้วเปรียบเทียบจำนวนและเวลาที่ใช้กับแต่ละ hash</p>
+      </div>
+      <div class="page-layout">
+        <section class="control-panel" aria-label="ตั้งค่า dictionary attack">
+          <label for="wl">Wordlist สำหรับสาธิต</label>
+          <select id="wl">
+            <option value="common">Common passwords ตัวอย่าง (อังกฤษ)</option>
+            <option value="th">Wordlist ตัวอย่างภาษาไทย</option>
+          </select>
+          <button class="preview-button" type="button" data-action="wordlist-modal">ดูคำใน Wordlist</button>
+          <label for="target2">รหัสผ่านเป้าหมาย</label>
+          <input id="target2" value="dragon" autocomplete="off">
+          <p class="field-hint">ลองคำที่อยู่ใน wordlist เช่น <code>dragon</code> หรือคำที่ไม่มีในรายการ</p>
+          <button class="primary-button" data-action="dictionary">เริ่ม Dictionary Attack</button>
+          <div id="dict-out" class="result-stack" aria-live="polite">
+            <div class="empty-result">ผลการลอง MD5, SHA-1 และ bcrypt จะแสดงตรงนี้</div>
+          </div>
+        </section>
+        <section class="live-panel" aria-labelledby="dict-log-title">
+          <div class="log-title-row"><h3 id="dict-log-title">Live Log</h3><span>Candidate-by-candidate</span></div>
+          <div class="log live-log" id="dict-log" aria-live="polite" aria-label="Dictionary attack log"></div>
+        </section>
+      </div>
+    </section>
+
+    <!-- Step 3 -->
+    <section class="panel" id="t3" aria-labelledby="title-t3">
+      <div class="page-heading">
+        <div><p class="eyebrow">STEP 03</p><h2 id="title-t3">Brute Force</h2></div>
+        <p>ดูผลของขนาดชุดอักขระและความยาวต่อจำนวน candidate ที่ต้องลอง</p>
+      </div>
+      <div class="page-layout">
+        <section class="control-panel" aria-label="ตั้งค่า brute force">
+          <div class="form-grid">
+            <div>
+              <label for="charset">Character set</label>
+              <select id="charset">
+                <option value="abcdefghijklmnopqrstuvwxyz">a-z (26)</option>
+                <option value="abcdefghijklmnopqrstuvwxyz0123456789">a-z, 0-9 (36)</option>
+                <option value="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789">a-z, A-Z, 0-9 (62)</option>
+              </select>
+            </div>
+            <div>
+              <label for="bruteLen">ความยาว</label>
+              <input type="number" id="bruteLen" value="3" min="1" max="10">
+            </div>
+          </div>
+          <label for="target3">รหัสผ่านเป้าหมาย</label>
+          <input id="target3" value="cat" autocomplete="off">
+          <p class="field-hint">ระบบทดลองไล่ candidate จริงเมื่อ keyspace ไม่เกินขอบเขตที่กำหนด</p>
+          <button class="primary-button" data-action="bruteforce">เริ่ม Brute Force</button>
+          <div id="brute-out" class="result-stack" aria-live="polite">
+            <div class="empty-result">Attempts, hash rate, เวลา และผลการค้นหาจะแสดงตรงนี้</div>
+          </div>
+        </section>
+        <section class="live-panel" aria-labelledby="brute-log-title">
+          <div class="log-title-row"><h3 id="brute-log-title">Live Log</h3><span>Candidate &amp; progress</span></div>
+          <div class="log live-log" id="brute-log" aria-live="polite" aria-label="Brute force log"></div>
+        </section>
+      </div>
+    </section>
+
+    <!-- Step 4 -->
+    <section class="panel" id="t4" aria-labelledby="title-t4">
+      <div class="page-heading">
+        <div><p class="eyebrow">STEP 04</p><h2 id="title-t4">Salt &amp; Key Stretching</h2></div>
+        <p>ดูว่า salt และต้นทุนการคำนวณช่วยป้องกันการเดารหัสผ่านได้อย่างไร</p>
+      </div>
+      <div class="salt-layout">
+        <section class="control-panel salt-control" aria-label="ทดลองสร้าง bcrypt hash">
+          <label for="pw4">รหัสผ่านตัวอย่าง</label>
+          <input id="pw4" value="MySecret!2024" autocomplete="off">
+          <label for="salt-cost">bcrypt cost factor <strong id="salt-cost-val">10</strong></label>
+          <input type="range" id="salt-cost" min="4" max="12" value="10">
+          <button class="primary-button" data-action="salt-demo">สร้าง Hash 3 ครั้ง</button>
+        </section>
+        <section class="salt-output-panel" aria-labelledby="salt-results-title">
+          <div class="log-title-row"><h3 id="salt-results-title">ผลลัพธ์จากการสร้าง Hash 3 รอบ</h3><span>bcrypt · independent salts</span></div>
+          <div id="salt-out" class="salt-results" aria-live="polite">
+            <div class="empty-result">กดปุ่มเพื่อสร้าง hash 3 รอบ แล้วเปรียบเทียบ salt และผลลัพธ์</div>
+          </div>
+          <p class="field-hint">รหัสผ่านตัวอย่างเดียวกันจะได้ hash ต่างกัน เพราะแต่ละรอบใช้ salt ที่สุ่มขึ้นใหม่</p>
+        </section>
+      </div>
+  <section class="live-panel salt-live" aria-labelledby="salt-log-title">
+        <div class="log-title-row"><h3 id="salt-log-title">Live Log</h3><span>Salt generation &amp; bcrypt</span></div>
+        <div id="salt-log" class="log live-log" aria-live="polite" aria-label="Salt generation log"></div>
+      </section>
+    </section>
+  </main>
+
+  <footer>สื่อสาธิตเพื่อการศึกษา · ใช้รหัสผ่านตัวอย่างเท่านั้น · การคำนวณทำงานบน Python server ในเครื่อง</footer>
+</div>
+<dialog class="wordlist-modal" id="wordlist-modal" aria-labelledby="wordlist-modal-title">
+  <div class="modal-header">
+    <div><p class="eyebrow">DICTIONARY ATTACK</p><h2 id="wordlist-modal-title">รายการคำใน Wordlist</h2></div>
+    <button class="modal-close" type="button" data-action="close-wordlist-modal" aria-label="ปิดหน้าต่าง" autofocus>×</button>
+  </div>
+  <p class="modal-description" id="wordlist-modal-description">รายการคำตัวอย่างที่เลือก</p>
+  <div class="wordlist-modal-content" id="wordlist-modal-content" aria-live="polite"></div>
+</dialog>
+<script defer src="/static/js/app.js"></script>
+</body>
+</html>
